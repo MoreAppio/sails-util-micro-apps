@@ -15,6 +15,7 @@ module.exports = function (sails, hook_dirname) {
     injectPolicies: function (dir) {
       require(__dirname + '/libs/policies')(sails, dir);
     },
+
     injectConfig: function (dir) {
       require(__dirname + '/libs/config')(sails, dir);
     },
@@ -29,6 +30,10 @@ module.exports = function (sails, hook_dirname) {
 
     injectServices: function (dir, cb) {
       require(__dirname + '/libs/services')(sails, dir, cb);
+    },
+
+    injectResponses: function (dir, cb) {
+      require(__dirname + '/libs/responses')(sails, dir, cb);
     },
 
     injectHelpers: function (dir, cb) {
@@ -57,8 +62,8 @@ module.exports = function (sails, hook_dirname) {
           models: hook_dirname + '/api/models',
           controllers: hook_dirname + '/api/controllers',
           helpers: hook_dirname + '/api/helpers',
-          services: hook_dirname + '/api/services'
-
+          services: hook_dirname + '/api/services',
+          responses: hook_dirname + '/api/responses'
         };
       }
 
@@ -87,7 +92,7 @@ module.exports = function (sails, hook_dirname) {
           if (err) {
             return next(err);
           }
-          // sails.log.verbose('Micro-app-loader: User hook models loaded from ' + dir.models + '.');
+          sails.log.verbose('Micro-app-loader: User hook models loaded from ' + dir.models + '.');
           return next(null);
         });
       };
@@ -97,7 +102,7 @@ module.exports = function (sails, hook_dirname) {
           if (err) {
             return next(err);
           }
-          // sails.log.verbose('Micro-app-loader: User hook controllers loaded from ' + dir.controllers + '.');
+          sails.log.verbose('Micro-app-loader: User hook controllers loaded from ' + dir.controllers + '.');
           return next(null);
         });
       };
@@ -107,7 +112,7 @@ module.exports = function (sails, hook_dirname) {
           if (err) {
             return next(err);
           }
-          // sails.log.verbose('Micro-app-loader: User hook helpers loaded from ' + dir.helpers + '.');
+          sails.log.verbose('Micro-app-loader: User hook helpers loaded from ' + dir.helpers + '.');
           return next(null);
         });
       };
@@ -117,7 +122,16 @@ module.exports = function (sails, hook_dirname) {
           if (err) {
             return next(err);
           }
-          // sails.log.verbose('Micro-app-loader: User hook services loaded from ' + dir.services + '.');
+          sails.log.verbose('Micro-app-loader: User hook services loaded from ' + dir.services + '.');
+          return next(null);
+        });
+      };
+
+      var loadResponses = function (next) {
+        self.injectResponses(dir.responses, function (err) {
+          if (err) {
+            return next(err);
+          }
           return next(null);
         });
       };
@@ -138,6 +152,8 @@ module.exports = function (sails, hook_dirname) {
           ? config.enable
           : true;
       }
+      
+      sails.log.info(`Micro-app-loader: ${isEnable ? 'Load' : 'Skip'} "${hookName}" from "${appRelativePath}".`);
 
       if (isEnable) {
 
@@ -167,15 +183,11 @@ module.exports = function (sails, hook_dirname) {
           toLoad.push(loadServices);
         }
   
+        if (dir.responses) {
+          toLoad.push(loadResponses);
+        }
+  
       }
-
-      var contains = Object.keys(dir).map(function (e) {
-        return (dir[e] !== undefined && dir[e] !== null)
-          ? e
-          : ''
-      });
-      
-      sails.log.info(`Micro-app-loader: ${isEnable ? 'Loaded' : 'Unload'} "${hookName}" - [${contains.map(e => ` ${e}`)} ]\t from "${appRelativePath}".`);
 
       async.parallel(toLoad, function (err) {
         if (err) {
