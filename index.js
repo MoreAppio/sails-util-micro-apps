@@ -156,7 +156,9 @@ module.exports = function (sails, hook_dirname) {
         toLoad.push(loadServices);
       }
 
-      sails.log.info(`Micro-app-loader: Sails User Hooks ${loadedHooks} loaded from \n"${hook_dirname}".`);
+      var sailsRoot = process.env.PWD;
+      var appRelativePath = hook_dirname.replace(sailsRoot, '');
+      sails.log.info(`Micro-app-loader: Loaded [${loadedHooks.map(e => ` ${e}`)} ] from "${appRelativePath}".`);
 
       async.parallel(toLoad, function (err) {
         if (err) {
