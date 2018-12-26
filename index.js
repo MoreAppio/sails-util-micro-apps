@@ -79,8 +79,8 @@ module.exports = function (sails, hook_dirname) {
       cb = cb || function () {};
 
       var self = this;
-
-      var loadedHooks = [];
+  
+      var toLoad = [];
 
       var loadModels = function (next) {
         self.injectModels(dir.models, function (err) {
@@ -138,46 +138,44 @@ module.exports = function (sails, hook_dirname) {
           ? config.enable
           : true;
       }
-  
-      var toLoad = [];
 
       if (isEnable) {
 
         if (dir.policies) {
           self.injectPolicies(dir.policies);
           // sails.log.verbose('Micro-app-loader: User hook policies loaded from ' + dir.policies + '.');
-          loadedHooks.push('policies');
         }
   
         if (dir.config) {
           self.injectConfig(dir.config);
           // sails.log.verbose('Micro-app-loader: User hook config loaded from ' + dir.config + '.');
-          loadedHooks.push('config');
         }
   
         if (dir.models) {
           toLoad.push(loadModels);
-          loadedHooks.push('models');
         }
   
         if (dir.controllers) {
           toLoad.push(loadControllers);
-          loadedHooks.push('controllers');
         }
   
         if (dir.helpers) {
           toLoad.push(loadHelpers);
-          loadedHooks.push('helpers');
         }
   
         if (dir.services) {
           toLoad.push(loadServices);
-          loadedHooks.push('services');
         }
   
       }
 
-      sails.log.info(`Micro-app-loader: ${isEnable ? 'Enable' : 'Disable'} "${hookName}"\t contains [${loadedHooks.map(e => ` ${e}`)} ]\t from "${appRelativePath}".`);
+      var contains = Object.keys(dir).map(function (e) {
+        return (dir[e] !== undefined && dir[e] !== null)
+          ? e
+          : ''
+      });
+      
+      sails.log.info(`Micro-app-loader: ${isEnable ? 'Loaded' : 'Unload'} - "${hookName}" - [${contains.map(e => ` ${e}`)} ]\t from "${appRelativePath}".`);
 
       async.parallel(toLoad, function (err) {
         if (err) {
