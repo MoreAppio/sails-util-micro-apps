@@ -175,7 +175,7 @@ module.exports = function (sails, hook_dirname) {
           : ''
       });
       
-      sails.log.info(`Micro-app-loader: ${isEnable ? 'Loaded' : 'Unload'} - "${hookName}" - [${contains.map(e => ` ${e}`)} ]\t from "${appRelativePath}".`);
+      sails.log.info(`Micro-app-loader: ${isEnable ? 'Loaded' : 'Unload'} "${hookName}" - [${contains.map(e => ` ${e}`)} ]\t from "${appRelativePath}".`);
 
       async.parallel(toLoad, function (err) {
         if (err) {
