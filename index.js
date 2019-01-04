@@ -153,7 +153,7 @@ module.exports = function (sails, hook_dirname) {
           : true;
       }
       
-      sails.log.info(`Micro-app-loader: ${isEnable ? 'Load' : 'Skip'} "${hookName}" from "${appRelativePath}".`);
+      sails.log.info(`Micro-app-loader: ${isEnable ? 'Load' : 'Skip'} "${hookName}" with [${Object.keys(dir).map(e => e.toString())}] from "${appRelativePath}".`);
 
       if (isEnable) {
 
